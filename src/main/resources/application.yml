@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: ${GATE_WAY_APP_NAME:gateway-service}
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allowedOrigins: "*"
+            allowedMethods:
+              - POST
+              - GET
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Content-Length
+              - X-Auth-Token
+            maxAge: 120
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AuthenticationFilter
+        # Uncomment to enable user-service route
+        # - id: user-service
+        #   uri: lb://USER-SERVICE
+        #   predicates:
+        #     - Path=/user/**
+        #   filters:
+        #     - AuthenticationFilter
+      enabled: ${GATE_WAY_ENABLED:true}
+  eureka:
+    client:
+      service-url:
+        defaultZone: ${AUTH_URL_DEFAULT:http://discovery-server-container:8100/eureka/}
+      enabled: ${GATE_WAY_ENABLED:true}
+    instance:
+      preferIpAddress: false
+
+server:
+  port: ${GATE_WAY_PORT:8101}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+jwtSecret: BvPHGM8C0ia4uOuxxqPD5DTbWC9F9TWvPStp3pb7ARo0oK2mJ3pd3YG4lxA9i8bj6OTbadwezxgeEByY
